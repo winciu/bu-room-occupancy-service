@@ -1,4 +1,4 @@
-package pl.rationalworks.buroomoccupancyservice.api;
+package pl.rationalworks.buroomoccupancyservice.model;
 
 import lombok.NoArgsConstructor;
 
@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@NoArgsConstructor
 public class Hotel {
+
+    private final Integer economyThresholdValue;
     private final Map<RoomType, Integer> availableRooms = new HashMap<>();
 
     /**
@@ -17,8 +18,10 @@ public class Hotel {
      */
     private final Map<RoomType, List<Integer>> bookedRooms = new HashMap<>();
 
-    public Integer setAvailableRooms(RoomType roomType, Integer amount){
-        return availableRooms.put(roomType, amount);
+    public Hotel(int economyRooms, int premiumRooms, Integer economyThresholdValue) {
+        availableRooms.put(RoomType.ECONOMY, economyRooms);
+        availableRooms.put(RoomType.PREMIUM, premiumRooms);
+        this.economyThresholdValue = economyThresholdValue;
     }
 
     public Integer getAvailableRooms(RoomType roomType) {
@@ -36,9 +39,11 @@ public class Hotel {
     public void bookARoom(RoomType roomType, Integer price) {
         availableRooms.computeIfPresent(roomType, (rt, amountOfAvailableRooms) -> {
             bookedRooms.putIfAbsent(rt, new ArrayList<>());
-            //if  we still have available rooms
-            boolean tooMuchForEconomy = roomType.equals(RoomType.ECONOMY) && price >= 100;
+            // clients offering high prices (above threshold) should not get an economy room
+            boolean tooMuchForEconomy = roomType.equals(RoomType.ECONOMY) && price >= economyThresholdValue;
+            //if we still have available rooms
             if (amountOfAvailableRooms > 0) {
+                // book a room and update total price
                 bookedRooms.computeIfPresent(roomType, (rType, prices) -> {
                     if (!tooMuchForEconomy) {
                         prices.add(price);
@@ -46,11 +51,11 @@ public class Hotel {
                     return prices;
                 });
                 if (tooMuchForEconomy) {
-                    return amountOfAvailableRooms;
+                    return amountOfAvailableRooms; // do nothing (return same value), since we cannot handle such case
                 }
-                return amountOfAvailableRooms - 1;
+                return amountOfAvailableRooms - 1; //decrease # of available rooms if successfully booked
             }
-            return amountOfAvailableRooms;
+            return amountOfAvailableRooms; // if no available rooms, do nothing
         });
     }
 }

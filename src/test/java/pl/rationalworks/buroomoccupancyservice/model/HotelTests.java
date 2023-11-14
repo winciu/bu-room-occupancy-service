@@ -1,4 +1,4 @@
-package pl.rationalworks.buroomoccupancyservice.api;
+package pl.rationalworks.buroomoccupancyservice.model;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -8,32 +8,27 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static pl.rationalworks.buroomoccupancyservice.api.RoomType.ECONOMY;
-import static pl.rationalworks.buroomoccupancyservice.api.RoomType.PREMIUM;
+import static pl.rationalworks.buroomoccupancyservice.model.RoomType.ECONOMY;
+import static pl.rationalworks.buroomoccupancyservice.model.RoomType.PREMIUM;
 
 public class HotelTests {
 
-    /**
-     * Utility method for creating a {@link Hotel} instance for a test. When using this method you need to obey a convention
-     * by specifying its input arguments. Both input parameters of this method are arrays where items with the same
-     * index forms a logical relation. <br/><br/>
-     * For instance, when {@code roomTypes = [ECONOMIC, PREMIUM]}  and {@code availableRooms = [2, 5]} it means that
-     * there are 2 available rooms in an economic standard.
-     *
-     * @param roomTypes      room type
-     * @param availableRooms number of available rooms for a given room type (an index should be relevant to the index
-     *                       of roomTypes array.
-     * @return a {@link Hotel} instance with initialized data for available rooms
-     */
-    private static Hotel createHotelWithAvailableRooms(RoomType[] roomTypes, Integer... availableRooms) {
-        Hotel hotel = new Hotel();
-        for (int i = 0; i < Math.min(roomTypes.length, availableRooms.length); i++) {
-            hotel.setAvailableRooms(roomTypes[i], availableRooms[i]);
-        }
-        return hotel;
+    private static final int ECONOMY_THRESHOLD = 100;
+
+    private static Hotel createHotelWithAvailableRooms(int economyRooms, int premiumRooms) {
+        return new Hotel(economyRooms, premiumRooms, ECONOMY_THRESHOLD);
     }
 
-
+    /**
+     * Utility method for booking rooms in a {@link Hotel} instance. When using this method you need to obey a convention
+     * by specifying its input arguments. Both input parameters of this method are arrays where items with the same
+     * index forms a logical relation. <br/><br/>
+     * For instance, when {@code roomTypes = [ECONOMIC, PREMIUM]}  and {@code prices = [20, 50]} it means that
+     * cost for economic room is 20.
+     *
+     * @param roomTypes room type
+     * @param prices    array of cost for a room in a given standard
+     */
     private static void bookRooms(Hotel hotel, RoomType[] roomTypes, Integer... prices) {
         for (int i = 0; i < Math.min(roomTypes.length, prices.length); i++) {
             hotel.bookARoom(roomTypes[i], prices[i]);
@@ -69,31 +64,17 @@ public class HotelTests {
         }
     }
 
-    @Test
-    void shouldSetRoomAvailabilityForAHotel() {
-        Hotel hotel = createHotelWithAvailableRooms(roomTypes(ECONOMY, PREMIUM), 1, 3);
-
-        assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY, PREMIUM), 1, 3);
-    }
-
-    @Test
-    void byDefaultHotelHasNoRoomsOfAnyType() {
-        Hotel hotel = createHotelWithAvailableRooms(roomTypes());
-
-        assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY, PREMIUM), 0, 0);
-    }
-
     private static Stream<Arguments> afterBookingMoreThenOneRoomNumberAndValueOfBookedRoomsShouldMatch() {
         return Stream.of(
                 Arguments.of(
-                        new TestPair(roomTypes(ECONOMY), 2), // available rooms
+                        new Integer[]{2, 0}, // available rooms
                         new TestPair(roomTypes(ECONOMY, ECONOMY), 30, 44), // booking data
                         new TestPair(roomTypes(ECONOMY), 0),  // asserting availability
                         new TestPair(roomTypes(ECONOMY), 2), // asserting number of booked rooms
                         new TestPair(roomTypes(ECONOMY), 74)  // asserting value of booked rooms
                 ),
                 Arguments.of(
-                        new TestPair(roomTypes(ECONOMY, PREMIUM), 2, 3),
+                        new Integer[]{2, 3},
                         new TestPair(roomTypes(ECONOMY, PREMIUM, PREMIUM), 30, 100, 321),
                         new TestPair(roomTypes(ECONOMY, PREMIUM), 1, 1),
                         new TestPair(roomTypes(ECONOMY, PREMIUM), 1, 2),
@@ -103,8 +84,22 @@ public class HotelTests {
     }
 
     @Test
+    void shouldSetRoomAvailabilityForAHotel() {
+        Hotel hotel = createHotelWithAvailableRooms(1, 3);
+
+        assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY, PREMIUM), 1, 3);
+    }
+
+    @Test
+    void byDefaultHotelHasNoRoomsOfAnyType() {
+        Hotel hotel = createHotelWithAvailableRooms(0, 0);
+
+        assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY, PREMIUM), 0, 0);
+    }
+
+    @Test
     void clientCanBookARoomOfAGivenType() {
-        Hotel hotel = createHotelWithAvailableRooms(roomTypes(ECONOMY, PREMIUM), 1, 2);
+        Hotel hotel = createHotelWithAvailableRooms(1, 2);
         bookRooms(hotel, roomTypes(PREMIUM, ECONOMY), 30, 44);
 
         assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY, PREMIUM), 0, 1);
@@ -114,9 +109,8 @@ public class HotelTests {
 
     @Test
     void clientCannotBookAnEconomyRoomPayingTooMuch() {
-        Hotel hotel = createHotelWithAvailableRooms(roomTypes(ECONOMY), 1);
-        final int tooMuchPriceForEconomyRoom = 100;
-        bookRooms(hotel, roomTypes(ECONOMY), tooMuchPriceForEconomyRoom);
+        Hotel hotel = createHotelWithAvailableRooms(1, 0);
+        bookRooms(hotel, roomTypes(ECONOMY), ECONOMY_THRESHOLD);
 
         assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY), 1);
     }
@@ -124,12 +118,12 @@ public class HotelTests {
     @ParameterizedTest
     @MethodSource
     void afterBookingMoreThenOneRoomNumberAndValueOfBookedRoomsShouldMatch(
-            TestPair availableRooms,
+            Integer[] availableRooms,
             TestPair bookingData,
             TestPair assertAvailabilityData,
             TestPair assertNumberOfBookedRoomsData,
             TestPair assertValueOfBookedRoomsData) {
-        Hotel hotel = createHotelWithAvailableRooms(availableRooms.roomTypes, availableRooms.values);
+        Hotel hotel = createHotelWithAvailableRooms(availableRooms[0], availableRooms[1]);
         bookRooms(hotel, bookingData.roomTypes, bookingData.values());
 
         assertAvailabilityOfRooms(hotel, assertAvailabilityData.roomTypes(), assertAvailabilityData.value());
@@ -139,7 +133,7 @@ public class HotelTests {
 
     @Test
     void itIsNotPossibleToBookMoreThanAvailableNumberOfRooms() {
-        Hotel hotel = createHotelWithAvailableRooms(roomTypes(ECONOMY), 1);
+        Hotel hotel = createHotelWithAvailableRooms(1, 0);
         bookRooms(hotel, roomTypes(ECONOMY, ECONOMY), 26, 44);
 
         assertAvailabilityOfRooms(hotel, roomTypes(ECONOMY), 0);
