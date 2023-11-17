@@ -18,7 +18,6 @@ public class BookingService {
         return new Hotel(economyRooms, premiumRooms, hotelProperties.getEconomyThreshold());
     }
 
-
     public void bookHotelRoomsForClients(Hotel hotel, ClientPrices clientPrices) {
         bookingAlgorithm.bookRooms(hotel, clientPrices);
     }
