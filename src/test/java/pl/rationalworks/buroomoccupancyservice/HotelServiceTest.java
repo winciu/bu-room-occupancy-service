@@ -11,14 +11,14 @@ import static pl.rationalworks.buroomoccupancyservice.model.RoomType.ECONOMY;
 import static pl.rationalworks.buroomoccupancyservice.model.RoomType.PREMIUM;
 
 @SpringBootTest
-public class BookingServiceTest {
+public class HotelServiceTest {
 
     @Autowired
-    private BookingService bookingService;
+    private HotelService hotelService;
 
     @Test
     void shouldSetupAHotelInstanceProperly() {
-        Hotel hotel = bookingService.setupHotel(2, 12);
+        Hotel hotel = hotelService.setupHotel(2, 12);
         assertEquals(2, hotel.getAvailableRooms(ECONOMY));
         assertEquals(12, hotel.getAvailableRooms(PREMIUM));
     }

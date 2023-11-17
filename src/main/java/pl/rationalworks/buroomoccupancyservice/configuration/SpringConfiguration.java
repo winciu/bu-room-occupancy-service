@@ -24,7 +24,7 @@ public class SpringConfiguration {
         JavaTimeModule module = new JavaTimeModule();
         return new ObjectMapper()
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .configure(SerializationFeature.WRAP_ROOT_VALUE, true)
+                .configure(SerializationFeature.WRAP_ROOT_VALUE, false)
                 .registerModule(module);
     }
 

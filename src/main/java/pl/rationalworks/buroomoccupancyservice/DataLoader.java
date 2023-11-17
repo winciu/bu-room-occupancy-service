@@ -49,8 +49,6 @@ public class DataLoader {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-//        ResponseEntity<int[]> response = restTemplate.exchange(sourceRemote, HttpMethod.GET, entity, int[].class);
-//        clientPrices = new ClientPrices(response.getBody());
         ResponseEntity<ClientPrices> response = restTemplate.exchange(sourceRemote, HttpMethod.GET, entity, ClientPrices.class);
         clientPrices = response.getBody();
     }

@@ -1,4 +1,4 @@
-package pl.rationalworks.buroomoccupancyservice;
+package pl.rationalworks.buroomoccupancyservice.algo;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -7,7 +7,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import pl.rationalworks.buroomoccupancyservice.algo.MaximizePremiumRoomsAlgorithm;
+import pl.rationalworks.buroomoccupancyservice.DataLoader;
+import pl.rationalworks.buroomoccupancyservice.algo.OnlyOneHighestPayingEconomyGetsPremiumRoomAlgorithm;
 import pl.rationalworks.buroomoccupancyservice.model.Hotel;
 import pl.rationalworks.buroomoccupancyservice.model.dto.ClientPrices;
 import pl.rationalworks.buroomoccupancyservice.properties.HotelProperties;
@@ -21,12 +22,12 @@ import static pl.rationalworks.buroomoccupancyservice.model.RoomType.PREMIUM;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class MaximizePremiumRoomsAlgorithmTest {
+public class OnlyOneHighestPayingEconomyGetsPremiumRoomAlgorithmTest {
 
     @Autowired
     private HotelProperties hotelProperties;
     @Autowired
-    private MaximizePremiumRoomsAlgorithm algorithm;
+    private OnlyOneHighestPayingEconomyGetsPremiumRoomAlgorithm algorithm;
     @Autowired
     private DataLoader dataLoader;
     private ClientPrices clientPrices;
@@ -34,18 +35,26 @@ public class MaximizePremiumRoomsAlgorithmTest {
     private static Stream<Arguments> numberOfRoomsBookedShouldMatchWhenBookingForMultipleClients() {
         return Stream.of(
                 Arguments.of(3, 3, 3, 3),
-                Arguments.of(5, 7, 3, 7),
+                Arguments.of(5, 7, 4, 6),
                 Arguments.of(7, 2, 4, 2),
-                Arguments.of(1, 10, 0, 10)
+                Arguments.of(1, 10, 1, 7),
+                // additional tests
+                Arguments.of(0, 10, 0, 7),
+                Arguments.of(6, 0, 4, 0),
+                Arguments.of(0, 0, 0, 0)
         );
     }
 
     private static Stream<Arguments> totalPriceOfRoomsBookedShouldMatchWhenBookingForMultipleClients() {
         return Stream.of(
                 Arguments.of(3, 3, 167, 738),
-                Arguments.of(5, 7, 90, 1153),
+                Arguments.of(5, 7, 189, 1054),
                 Arguments.of(7, 2, 189, 583),
-                Arguments.of(1, 10, 0, 1243)
+                Arguments.of(1, 10, 45, 1153),
+                // additional tests
+                Arguments.of(0, 10, 0, 1153),
+                Arguments.of(6, 0, 189, 0),
+                Arguments.of(0, 0, 0, 0)
         );
     }
 
