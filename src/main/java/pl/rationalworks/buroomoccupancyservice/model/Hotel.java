@@ -1,5 +1,7 @@
 package pl.rationalworks.buroomoccupancyservice.model;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 
 public class Hotel {
 
+    @Getter
     private final Integer economyThresholdValue;
     private final Map<RoomType, Integer> availableRooms = new HashMap<>();
 
