@@ -1,8 +1,8 @@
 hotel:
   economy:
     threshold: 100
-  algo: maximizePremiumRooms
-#  algo: onlyOneHighestPayingEconomyCanGetPremium
+#  algo: maximizePremiumRooms
+  algo: onlyOneHighestPayingEconomyGetsPremium
 
 data-loader:
   mode: local

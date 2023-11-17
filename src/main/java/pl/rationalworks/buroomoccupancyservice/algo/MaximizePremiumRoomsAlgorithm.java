@@ -6,16 +6,15 @@ import pl.rationalworks.buroomoccupancyservice.model.Hotel;
 import pl.rationalworks.buroomoccupancyservice.model.RoomType;
 import pl.rationalworks.buroomoccupancyservice.model.dto.ClientPrices;
 
-import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
-import static org.apache.commons.lang3.ArrayUtils.reverse;
+import static pl.rationalworks.buroomoccupancyservice.model.RoomType.ECONOMY;
+import static pl.rationalworks.buroomoccupancyservice.model.RoomType.PREMIUM;
 
 @Component
 @ConditionalOnProperty(
         value = "hotel.algo",
-        havingValue = "maximizePremiumRooms",
-        matchIfMissing = true)
-public class MaximizePremiumRoomsAlgorithm implements RoomBookingAlgorithm {
+        havingValue = "maximizePremiumRooms")
+public class MaximizePremiumRoomsAlgorithm extends RoomBookingAlgorithm {
 
     /**
      * Method used to book a hotel room for a specified price. Algorithm used in this method decides which standard of the room
@@ -26,30 +25,22 @@ public class MaximizePremiumRoomsAlgorithm implements RoomBookingAlgorithm {
      * still available and their offer price for a room was higher than other prices below threshold.
      *
      * @param hotel        {@link Hotel} instance for which the booking should take place
-     * @param clientPrices an instance of {@link ClientPrices} containing client prices they want to pay for a room
+     * @param economyPrices an array of sorted, reversed prices lower than a configurable threshold
+     * @param premiumPrices an array of sorted, reversed prices higher or equal than a configurable threshold
      */
     @Override
-    public void bookRooms(Hotel hotel, ClientPrices clientPrices) {
-        //sort the client prices array
-        int[] prices = clientPrices.prices();
-        sort(prices);
-        // split this sorted array into two arrays based on an economy-standard threshold value.
-        int[] economyPrices = stream(prices).filter(p -> p < hotel.getEconomyThresholdValue()).toArray();
-        int[] premiumPrices = stream(prices).filter(p -> p >= hotel.getEconomyThresholdValue()).toArray();
-
+    public void bookRooms(Hotel hotel, int[] economyPrices, int[] premiumPrices) {
         // start booking rooms for premium offers, start from the end (the higher price offered)
-        reverse(premiumPrices);
-        stream(premiumPrices).forEach(price -> hotel.bookARoom(RoomType.PREMIUM, price));
+        stream(premiumPrices).forEach(price -> hotel.bookARoom(PREMIUM, price));
 
         // continue with economy prices, but offer a premium room if available
         // start from the higher prices
-        reverse(economyPrices);
         stream(economyPrices)
                 .forEach(price -> {
-                    if (hotel.getAvailableRooms(RoomType.PREMIUM) > 0) {
-                        hotel.bookARoom(RoomType.PREMIUM, price);
+                    if (hotel.getAvailableRooms(PREMIUM) > 0) {
+                        hotel.bookARoom(PREMIUM, price);
                     } else {
-                        hotel.bookARoom(RoomType.ECONOMY, price);
+                        hotel.bookARoom(ECONOMY, price);
                     }
                 });
     }
