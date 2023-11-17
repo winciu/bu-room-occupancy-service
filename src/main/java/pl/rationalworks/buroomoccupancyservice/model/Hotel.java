@@ -1,7 +1,5 @@
 package pl.rationalworks.buroomoccupancyservice.model;
 
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +27,11 @@ public class Hotel {
     }
 
     public Integer getNumberOfBookedRooms(RoomType roomType) {
-        return bookedRooms.get(roomType).size();
+        return bookedRooms.getOrDefault(roomType, List.of()).size();
     }
 
     public Integer getValueOfBookedRooms(RoomType roomType) {
-        return bookedRooms.get(roomType).stream().mapToInt(Integer::intValue).sum();
+        return bookedRooms.getOrDefault(roomType, List.of()).stream().mapToInt(Integer::intValue).sum();
     }
 
     public void bookARoom(RoomType roomType, Integer price) {

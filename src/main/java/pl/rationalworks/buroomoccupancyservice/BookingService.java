@@ -41,7 +41,7 @@ public class BookingService {
         int[] economyPrices = stream(prices).filter(p -> p < thresholdValue).toArray();
         int[] premiumPrices = stream(prices).filter(p -> p >= thresholdValue).toArray();
 
-        // start booking rooms from premium offers, start from the end (the higher price)
+        // start booking rooms for premium offers, start from the end (the higher price offered)
         reverse(premiumPrices);
         stream(premiumPrices).forEach(price -> hotel.bookARoom(RoomType.PREMIUM, price));
 
