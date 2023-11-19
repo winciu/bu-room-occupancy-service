@@ -1,0 +1,10 @@
+[
+  {
+    "roomType": "PREMIUM",
+    "available": 2
+  },
+  {
+    "roomType": "ECONOMY",
+    "available": 7
+  }
+]

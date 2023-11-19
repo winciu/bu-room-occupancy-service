@@ -14,7 +14,7 @@ import pl.rationalworks.buroomoccupancyservice.model.dto.ClientPrices;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,7 +39,7 @@ public class HotelControllerTest {
         when(hotelService.bookHotelRoomsForClients(any(ClientPrices.class)))
                 .thenReturn(new Hotel(3, 7, 100));
 
-        mvc.perform(put("/hotel/book")
+        mvc.perform(post("/hotel/book")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(clientPrices)))
                 .andDo(print())

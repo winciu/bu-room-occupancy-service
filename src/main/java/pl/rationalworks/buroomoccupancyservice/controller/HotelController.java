@@ -2,6 +2,7 @@ package pl.rationalworks.buroomoccupancyservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.rationalworks.buroomoccupancyservice.HotelService;
@@ -13,6 +14,7 @@ import pl.rationalworks.buroomoccupancyservice.model.dto.RoomDto;
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static pl.rationalworks.buroomoccupancyservice.model.RoomType.ECONOMY;
 import static pl.rationalworks.buroomoccupancyservice.model.RoomType.PREMIUM;
 
@@ -37,13 +39,13 @@ public class HotelController {
                 hotel.getEconomyThresholdValue());
     }
 
-    @GetMapping("/")
+    @GetMapping()
     public ResponseEntity<HotelDto> obtainHotelData() {
         log.info("Retrieving hotel data ...");
         return ResponseEntity.ok(convertToHotelDto(hotelService.getHotel()));
     }
 
-    @PutMapping("/setup")
+    @PutMapping(value = "/setup", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<HotelDto> setupAvailableRooms(@RequestBody List<RoomDto> rooms) {
         int availableEconomyRooms = rooms.stream()
                 .filter(r -> r.roomType().equals(ECONOMY))
@@ -64,7 +66,7 @@ public class HotelController {
      * @param clientPrices an instance of {@link ClientPrices} object containing proposed prices
      * @return an instance of a hotel object describing its current state
      */
-    @PutMapping("/book")
+    @PostMapping("/book")
     public ResponseEntity<HotelDto> bookRooms(@RequestBody ClientPrices clientPrices) {
         Hotel hotel = hotelService.bookHotelRoomsForClients(clientPrices);
         return ResponseEntity.ok(convertToHotelDto(hotel));

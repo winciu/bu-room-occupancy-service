@@ -2,11 +2,14 @@ package pl.rationalworks.buroomoccupancyservice.algo;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.EnabledIf;
 import pl.rationalworks.buroomoccupancyservice.DataLoader;
 import pl.rationalworks.buroomoccupancyservice.model.Hotel;
 import pl.rationalworks.buroomoccupancyservice.model.dto.ClientPrices;
@@ -21,6 +24,8 @@ import static pl.rationalworks.buroomoccupancyservice.model.RoomType.PREMIUM;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ActiveProfiles("test")
+@EnabledIf(expression = "#{environment['hotel.algo'] == 'maximizePremiumRooms'}", loadContext = true)
 public class MaximizePremiumRoomsAlgorithmTest {
 
     @Autowired
